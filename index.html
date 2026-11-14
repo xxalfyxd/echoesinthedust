@@ -1,0 +1,1630 @@
+<!DOCTYPE html>
+<html lang="en" class="dark scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Echoes in the Dust: NASA’s Forgotten Explorers</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Orbitron for Space Headers, Inter for Readability, JetBrains Mono for Telemetry -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Orbitron:wght@500;700;800;900&display=swap" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        display: ['Orbitron', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    animation: {
+                        'radar-sweep': 'radarSweep 5s linear infinite',
+                        'float-slow': 'floatSlow 6s ease-in-out infinite',
+                        'pulse-glow': 'pulseGlow 2.5s ease-in-out infinite',
+                    },
+                    keyframes: {
+                        radarSweep: {
+                            '0%': { transform: 'rotate(0deg)' },
+                            '100%': { transform: 'rotate(360deg)' }
+                        },
+                        floatSlow: {
+                            '0%, 100%': { transform: 'translateY(0px)' },
+                            '50%': { transform: 'translateY(-6px)' }
+                        },
+                        pulseGlow: {
+                            '0%, 100%': { opacity: '0.6', transform: 'scale(1)' },
+                            '50%': { opacity: '1', transform: 'scale(1.12)' }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        :root {
+            --accent-primary: #f97316;
+            --accent-secondary: #38bdf8;
+            --accent-glow: rgba(249, 115, 22, 0.35);
+        }
+
+        body {
+            background-color: #050814;
+            color: #f8fafc;
+            overflow-x: hidden;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #070b19;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #1e293b;
+            border-radius: 9999px;
+            border: 2px solid #070b19;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--accent-primary);
+        }
+
+        /* Glassmorphic Cosmic Panels */
+        .cosmic-card {
+            background: linear-gradient(145deg, rgba(15, 23, 42, 0.78) 0%, rgba(9, 13, 28, 0.88) 100%);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(148, 163, 184, 0.14);
+            transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .cosmic-card:hover {
+            transform: translateY(-6px);
+            border-color: var(--accent-primary);
+            box-shadow: 0 16px 40px -12px var(--accent-glow);
+        }
+
+        /* Scanline Overlay for Hologram Feel */
+        .scanlines {
+            background: linear-gradient(
+                to bottom,
+                rgba(255,255,255,0),
+                rgba(255,255,255,0) 50%,
+                rgba(0, 0, 0, 0.2) 50%,
+                rgba(0, 0, 0, 0.2)
+            );
+            background-size: 100% 4px;
+        }
+
+        /* Radar Sweep Conic Gradient */
+        .radar-cone {
+            background: conic-gradient(
+                from 0deg,
+                transparent 0deg,
+                transparent 285deg,
+                var(--accent-glow) 345deg,
+                var(--accent-primary) 360deg
+            );
+        }
+
+        /* Typewriter Cursor */
+        .typewriter-cursor::after {
+            content: '▋';
+            display: inline-block;
+            margin-left: 4px;
+            color: var(--accent-primary);
+            animation: blink 0.9s infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+
+        /* Custom Scratch Canvas Cursor */
+        .dust-canvas-cursor {
+            cursor: crosshair;
+            touch-action: none;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col selection:bg-orange-500 selection:text-white relative">
+
+    <!-- Interactive Starfield & Planetary Dust Canvas Background -->
+    <canvas id="cosmosCanvas" class="fixed inset-0 pointer-events-none z-0"></canvas>
+
+    <!-- Ambient Radial Glow Overlay -->
+    <div id="ambientGlow" class="fixed inset-0 pointer-events-none z-0 transition-all duration-1000"
+         style="background: radial-gradient(circle at 50% 15%, rgba(249, 115, 22, 0.13), rgba(56, 189, 248, 0.06) 45%, transparent 75%);">
+    </div>
+
+    <!-- STICKY TELEMETRY HEADER -->
+    <header class="sticky top-0 z-40 border-b border-slate-800/80 bg-slate-950/80 backdrop-blur-xl">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 sm:h-20 flex items-center justify-between gap-3">
+            <!-- Brand Title -->
+            <a href="#" class="flex items-center gap-3 group focus:outline-none">
+                <div id="brandIconBox" class="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-gradient-to-br from-orange-500 to-amber-600 flex items-center justify-center shadow-lg shadow-orange-500/25 group-hover:scale-105 transition-transform">
+                    <i class="fa-solid fa-satellite-dish text-white text-lg"></i>
+                </div>
+                <div>
+                    <div class="flex items-center gap-2">
+                        <span class="font-display font-bold tracking-wider text-sm sm:text-lg text-white">ECHOES IN THE DUST</span>
+                        <span class="hidden md:inline-block text-[10px] font-mono uppercase px-2 py-0.5 rounded-full bg-orange-500/20 text-orange-300 border border-orange-500/30">
+                            NASA Space Apps
+                        </span>
+                    </div>
+                    <p class="text-[11px] font-mono text-slate-400 hidden sm:block">ORBITAL ARCHIVE // ABANDONED BUT NOT FORGOTTEN</p>
+                </div>
+            </a>
+
+            <!-- Telemetry & Controls -->
+            <div class="flex items-center gap-2 sm:gap-4">
+                <!-- Progress Pill -->
+                <div class="bg-slate-900/90 border border-slate-700/70 rounded-xl px-3 py-1.5 flex items-center gap-3">
+                    <div class="flex flex-col">
+                        <div class="flex items-center justify-between gap-2">
+                            <span class="text-[10px] font-mono uppercase tracking-wider text-slate-400">Relics Decoded</span>
+                            <span id="headerProgressText" class="text-xs font-mono font-bold text-orange-400">0 / 6</span>
+                        </div>
+                        <div class="w-24 sm:w-32 h-1.5 bg-slate-800 rounded-full overflow-hidden mt-1">
+                            <div id="headerProgressBar" class="h-full bg-gradient-to-r from-orange-500 to-amber-400 transition-all duration-500" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Badges Vault Button -->
+                <button onclick="toggleBadgesModal()" class="relative px-3 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700/80 text-xs font-mono text-slate-200 flex items-center gap-2 transition-all hover:border-amber-400/60" title="View Earned Mission Badges">
+                    <i class="fa-solid fa-award text-amber-400 text-sm"></i>
+                    <span class="hidden md:inline">Badges</span>
+                    <span id="badgeCountBubble" class="px-1.5 py-0.2 rounded-full bg-amber-500/20 text-amber-300 border border-amber-400/40 font-bold">0</span>
+                </button>
+
+                <!-- Sound FX Toggle -->
+                <button id="soundToggleBtn" onclick="toggleSound()" class="p-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700/80 text-slate-300 hover:text-white transition-all" title="Toggle Space Telemetry Sound Effects">
+                    <i id="soundIcon" class="fa-solid fa-volume-high text-emerald-400"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN CONTENT CONTAINER -->
+    <main class="relative z-10 flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-20">
+
+        <!-- HERO SECTION -->
+        <section class="relative rounded-3xl overflow-hidden border border-slate-800/90 bg-slate-950/60 backdrop-blur-xl p-6 sm:p-10 mb-10 shadow-2xl">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+                <!-- Left Column: Storytelling Hook -->
+                <div class="lg:col-span-7 space-y-5">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-orange-500/10 border border-orange-500/30 text-orange-300 text-xs font-mono">
+                        <span class="w-2 h-2 rounded-full bg-orange-400 animate-ping"></span>
+                        <span>LIVE TELEMETRY ARCHIVE // SOLAR SYSTEM HARDWARE</span>
+                    </div>
+
+                    <h1 class="font-display font-extrabold text-3xl sm:text-5xl lg:text-6xl tracking-tight text-white leading-tight">
+                        Left Behind in the <span id="heroHighlight" class="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 via-amber-300 to-cyan-400">Cosmic Dust.</span>
+                    </h1>
+
+                    <p class="text-slate-300 text-base sm:text-lg leading-relaxed max-w-2xl">
+                        Since the 1960s, NASA has sent robotic pioneers and astronaut gear to the Moon, Mars, and beyond. When their batteries faded or astronauts returned home, these machines stayed behind—not as trash, but as <span class="text-white font-semibold">silent monuments to human curiosity</span>. Pick a world below to hear their stories in their own words!
+                    </p>
+
+                    <!-- Quick Action Buttons -->
+                    <div class="flex flex-wrap items-center gap-3 pt-2">
+                        <a href="#explorerSection" onclick="playTone(520, 0.08, 'sine')" class="px-5 py-3 rounded-xl bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-400 hover:to-amber-500 text-white font-display font-bold text-xs sm:text-sm tracking-wider uppercase shadow-lg shadow-orange-500/25 flex items-center gap-2 transition-all">
+                            <i class="fa-solid fa-compass"></i>
+                            <span>Scan Planetary Relics</span>
+                        </a>
+                        <button onclick="openRandomRelic()" class="px-4 py-3 rounded-xl bg-slate-900/90 hover:bg-slate-800 border border-slate-700 text-slate-200 font-mono text-xs sm:text-sm flex items-center gap-2 transition-all">
+                            <i class="fa-solid fa-wand-magic-sparkles text-cyan-400"></i>
+                            <span>Surprise Me (Random Signal)</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Right Column: 3 Animated Telemetry Stat Cards -->
+                <div class="lg:col-span-5 grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-1 gap-3.5">
+                    <div class="p-4 rounded-2xl bg-slate-900/75 border border-slate-800 flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-xl bg-cyan-500/15 border border-cyan-500/30 flex items-center justify-center text-cyan-400 shrink-0">
+                            <i class="fa-solid fa-weight-hanging text-xl"></i>
+                        </div>
+                        <div>
+                            <div class="font-display font-bold text-xl sm:text-2xl text-white">400,000+ lbs</div>
+                            <div class="text-xs text-slate-400">Of historic exploration gear resting on the Moon & Mars</div>
+                        </div>
+                    </div>
+
+                    <div class="p-4 rounded-2xl bg-slate-900/75 border border-slate-800 flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-xl bg-orange-500/15 border border-orange-500/30 flex items-center justify-center text-orange-400 shrink-0">
+                            <i class="fa-solid fa-clock-rotate-left text-xl"></i>
+                        </div>
+                        <div>
+                            <div class="font-display font-bold text-xl sm:text-2xl text-white">60+ Years</div>
+                            <div class="text-xs text-slate-400">From Apollo 11 in 1969 to Ingenuity’s final flight on Mars</div>
+                        </div>
+                    </div>
+
+                    <div class="p-4 rounded-2xl bg-slate-900/75 border border-slate-800 flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-xl bg-purple-500/15 border border-purple-500/30 flex items-center justify-center text-purple-400 shrink-0">
+                            <i class="fa-solid fa-microscope text-xl"></i>
+                        </div>
+                        <div>
+                            <div class="font-display font-bold text-xl sm:text-2xl text-white">100% Science</div>
+                            <div class="text-xs text-slate-400">Brush off the dust, read their diaries & earn 6 NASA Badges!</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- INTERACTIVE SECTOR SELECTOR -->
+        <section id="explorerSection" class="mb-8 scroll-mt-24">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+                <div>
+                    <h2 class="font-display font-bold text-xl sm:text-2xl text-white flex items-center gap-2.5">
+                        <i class="fa-solid fa-satellite text-orange-400"></i>
+                        <span>SELECT PLANETARY SECTOR</span>
+                    </h2>
+                    <p class="text-xs sm:text-sm text-slate-400">Switching sectors recalibrates the orbital radar scanner and shifts cosmic dust telemetry.</p>
+                </div>
+
+                <!-- Sector Filter Buttons -->
+                <div class="grid grid-cols-2 sm:flex items-center gap-2 bg-slate-900/90 p-1.5 rounded-2xl border border-slate-800">
+                    <button onclick="setSector('all')" id="sectorBtn-all" class="sector-btn px-4 py-2.5 rounded-xl font-display font-bold text-xs tracking-wider uppercase transition-all flex items-center justify-center gap-2 bg-gradient-to-r from-orange-500 to-amber-600 text-white shadow-md">
+                        <i class="fa-solid fa-globe"></i>
+                        <span>All Sectors (6)</span>
+                    </button>
+                    <button onclick="setSector('mars')" id="sectorBtn-mars" class="sector-btn px-4 py-2.5 rounded-xl font-display font-bold text-xs tracking-wider uppercase transition-all flex items-center justify-center gap-2 text-slate-300 hover:text-white hover:bg-slate-800/70">
+                        <i class="fa-solid fa-circleDot text-orange-400"></i>
+                        <span>Mars (3)</span>
+                    </button>
+                    <button onclick="setSector('moon')" id="sectorBtn-moon" class="sector-btn px-4 py-2.5 rounded-xl font-display font-bold text-xs tracking-wider uppercase transition-all flex items-center justify-center gap-2 text-slate-300 hover:text-white hover:bg-slate-800/70">
+                        <i class="fa-solid fa-moon text-cyan-300"></i>
+                        <span>The Moon (2)</span>
+                    </button>
+                    <button onclick="setSector('deepspace')" id="sectorBtn-deepspace" class="sector-btn px-4 py-2.5 rounded-xl font-display font-bold text-xs tracking-wider uppercase transition-all flex items-center justify-center gap-2 text-slate-300 hover:text-white hover:bg-slate-800/70">
+                        <i class="fa-solid fa-shuttle-space text-purple-400"></i>
+                        <span>Deep Space (1)</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- ORBITAL SURFACE SCANNER + HARDWARE CARDS LAYOUT -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+
+                <!-- LEFT PANEL: Interactive Orbital Radar Scanner -->
+                <div class="lg:col-span-4 cosmic-card rounded-3xl p-5 sm:p-6 lg:sticky lg:top-24">
+                    <div class="flex items-center justify-between border-b border-slate-800 pb-3 mb-4">
+                        <div>
+                            <span class="text-[10px] font-mono uppercase tracking-widest text-slate-400 block">ORBITAL SURFACE SCANNER</span>
+                            <h3 id="radarSectorTitle" class="font-display font-bold text-base text-white">SOLAR SYSTEM WIDE</h3>
+                        </div>
+                        <span class="px-2.5 py-1 rounded-md bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 font-mono text-[11px] flex items-center gap-1.5">
+                            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                            ACTIVE
+                        </span>
+                    </div>
+
+                    <!-- Circular Radar Visualization -->
+                    <div class="relative w-60 h-60 sm:w-64 sm:h-64 mx-auto my-2 rounded-full bg-slate-950 border-2 border-slate-700/80 shadow-inner overflow-hidden flex items-center justify-center">
+                        <!-- Concentric Range Rings -->
+                        <div class="absolute w-3/4 h-3/4 rounded-full border border-slate-800/90 pointer-events-none"></div>
+                        <div class="absolute w-2/4 h-2/4 rounded-full border border-slate-800/90 pointer-events-none"></div>
+                        <div class="absolute w-1/4 h-1/4 rounded-full border border-slate-800/90 pointer-events-none"></div>
+                        <!-- Crosshairs -->
+                        <div class="absolute inset-x-0 h-[1px] bg-slate-800/90 pointer-events-none"></div>
+                        <div class="absolute inset-y-0 w-[1px] bg-slate-800/90 pointer-events-none"></div>
+
+                        <!-- Rotating Radar Sweep Cone -->
+                        <div class="absolute inset-0 rounded-full radar-cone animate-radar-sweep pointer-events-none opacity-55"></div>
+
+                        <!-- Dynamic Blips Container -->
+                        <div id="radarBlipsContainer" class="absolute inset-0">
+                            <!-- Blips injected by JS -->
+                        </div>
+                    </div>
+
+                    <!-- Selected / Hovered Radar Blip Readout -->
+                    <div id="radarReadoutBox" class="mt-4 p-3.5 rounded-2xl bg-slate-950/90 border border-slate-800/90 font-mono text-xs space-y-1">
+                        <div class="text-slate-400 text-[10px] uppercase">SIGNAL LOCK TELEMETRY:</div>
+                        <div id="radarReadoutName" class="text-white font-bold text-sm truncate">Click any glowing blip or card</div>
+                        <div id="radarReadoutCoords" class="text-orange-400 text-[11px]">LAT/LON: SCANNING SECTOR...</div>
+                    </div>
+
+                    <!-- Legend -->
+                    <div class="mt-4 pt-3 border-t border-slate-800/80 flex items-center justify-between text-[11px] font-mono text-slate-400">
+                        <span class="flex items-center gap-1.5">
+                            <span class="w-2.5 h-2.5 rounded-full bg-orange-500 inline-block"></span> Unexplored
+                        </span>
+                        <span class="flex items-center gap-1.5">
+                            <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 inline-block"></span> Decoded Badge
+                        </span>
+                    </div>
+                </div>
+
+                <!-- RIGHT PANEL: Hardware Relic Cards Grid -->
+                <div id="hardwareGrid" class="lg:col-span-8 grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <!-- Populated dynamically via JS -->
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- RELIC STORY, SCIENCE & DUST RESTORATION MODAL -->
+    <div id="relicModal" class="fixed inset-0 z-50 hidden items-center justify-center p-3 sm:p-6 bg-slate-950/85 backdrop-blur-md overflow-y-auto">
+        <div class="relative w-full max-w-4xl rounded-3xl bg-slate-900 border border-slate-700/90 shadow-2xl overflow-hidden my-auto max-h-[92vh] flex flex-col">
+
+            <!-- Modal Top Telemetry Bar -->
+            <div id="modalHeaderBar" class="px-5 sm:px-7 py-4 bg-slate-950 border-b border-slate-800 flex items-center justify-between gap-4 shrink-0">
+                <div class="flex items-center gap-3 min-w-0">
+                    <span id="modalSectorBadge" class="px-2.5 py-1 rounded-lg text-xs font-mono font-bold uppercase bg-orange-500/20 text-orange-300 border border-orange-500/30 shrink-0">
+                        MARS
+                    </span>
+                    <div class="min-w-0">
+                        <h3 id="modalRelicTitle" class="font-display font-bold text-lg sm:text-xl text-white truncate">Opportunity Rover ("Oppy")</h3>
+                        <p id="modalRelicSubtitle" class="text-xs font-mono text-slate-400 truncate">Meridiani Planum • 2004–2018</p>
+                    </div>
+                </div>
+
+                <button onclick="closeRelicModal()" class="w-9 h-9 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white flex items-center justify-center transition-colors shrink-0" title="Close Dossier (Esc)">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <!-- Interactive Navigation Tabs -->
+            <div class="px-5 sm:px-7 pt-3 bg-slate-950/60 border-b border-slate-800 flex flex-wrap gap-2 shrink-0">
+                <button onclick="switchModalTab('story')" id="tabBtn-story" class="modal-tab-btn px-4 py-2.5 rounded-t-xl font-display font-bold text-xs uppercase tracking-wider border-b-2 border-orange-500 text-white bg-slate-900/90 flex items-center gap-2 transition-all">
+                    <i class="fa-solid fa-comment-dots text-orange-400"></i>
+                    <span>1. Echo Log (My Story)</span>
+                </button>
+                <button onclick="switchModalTab('science')" id="tabBtn-science" class="modal-tab-btn px-4 py-2.5 rounded-t-xl font-display font-bold text-xs uppercase tracking-wider border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center gap-2 transition-all">
+                    <i class="fa-solid fa-flask text-cyan-400"></i>
+                    <span>2. The Science Unlocked</span>
+                </button>
+                <button onclick="switchModalTab('restore')" id="tabBtn-restore" class="modal-tab-btn px-4 py-2.5 rounded-t-xl font-display font-bold text-xs uppercase tracking-wider border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center gap-2 transition-all">
+                    <i class="fa-solid fa-broom-ball text-emerald-400"></i>
+                    <span>3. Clear Dust & Earn Badge</span>
+                </button>
+            </div>
+
+            <!-- Modal Body (Scrollable) -->
+            <div class="p-5 sm:p-7 overflow-y-auto space-y-6 flex-grow">
+
+                <!-- TAB 1: ECHO LOG (FIRST-PERSON DIARY) -->
+                <div id="tabContent-story" class="space-y-6">
+                    <div class="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
+                        <!-- SVG Hardware Illustration Panel -->
+                        <div class="md:col-span-5 rounded-2xl bg-slate-950 border border-slate-800 p-5 flex flex-col items-center justify-center relative overflow-hidden scanlines">
+                            <div id="modalSvgIllustration" class="w-44 h-44 flex items-center justify-center animate-float-slow">
+                                <!-- Injected SVG -->
+                            </div>
+                            <div class="mt-3 text-center">
+                                <span id="modalStatusPill" class="px-3 py-1 rounded-full text-[11px] font-mono uppercase bg-amber-500/20 text-amber-300 border border-amber-500/40">
+                                    STATUS: DORMANT IN DUST
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- First-Person Diary Log -->
+                        <div class="md:col-span-7 space-y-4">
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs font-mono uppercase tracking-wider text-orange-400 flex items-center gap-2">
+                                    <i class="fa-solid fa-tower-broadcast animate-pulse"></i>
+                                    FIRST-PERSON MEMORY TRANSMISSION
+                                </span>
+                                <button onclick="finishTypewriterImmediately()" id="skipTypewriterBtn" class="text-[11px] font-mono text-slate-400 hover:text-white underline">
+                                    Show Full Text
+                                </button>
+                            </div>
+
+                            <div class="p-4 sm:p-5 rounded-2xl bg-slate-950/90 border border-slate-800/90 min-h-[160px] flex items-center">
+                                <p id="typewriterText" class="text-slate-200 text-sm sm:text-base leading-relaxed font-sans typewriter-cursor"></p>
+                            </div>
+
+                            <!-- Final Words Quote Box -->
+                            <div class="p-4 rounded-2xl bg-gradient-to-r from-orange-500/10 to-amber-500/5 border border-orange-500/30">
+                                <div class="text-[10px] font-mono uppercase tracking-widest text-orange-300 mb-1">ICONIC TRANSMISSION / STATUS LOG</div>
+                                <p id="modalLastWords" class="font-mono italic text-sm text-white"></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Why Was I Left Behind? Card -->
+                    <div class="p-5 rounded-2xl bg-slate-950/70 border border-slate-800 flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+                        <div class="w-11 h-11 rounded-xl bg-cyan-500/15 border border-cyan-500/30 flex items-center justify-center text-cyan-400 shrink-0">
+                            <i class="fa-solid fa-circle-question text-xl"></i>
+                        </div>
+                        <div class="flex-grow">
+                            <h4 class="font-display font-bold text-sm text-white uppercase tracking-wide">Why Was This Hardware Left Behind?</h4>
+                            <p id="modalWhyLeftBehind" class="text-xs sm:text-sm text-slate-300 mt-1 leading-relaxed"></p>
+                        </div>
+                        <button onclick="switchModalTab('science')" class="px-4 py-2.5 rounded-xl bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 border border-cyan-500/40 font-mono text-xs shrink-0 transition-all">
+                            See My Science <i class="fa-solid fa-arrow-right ml-1"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- TAB 2: THE SCIENCE IT UNLOCKED -->
+                <div id="tabContent-science" class="hidden space-y-6">
+                    <div class="p-4 rounded-2xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-between gap-4">
+                        <div class="flex items-center gap-3">
+                            <i class="fa-solid fa-atom text-cyan-400 text-2xl"></i>
+                            <div>
+                                <h4 class="font-display font-bold text-sm sm:text-base text-white">What Did This Explorer Discover for Humanity?</h4>
+                                <p class="text-xs text-slate-300">Even though this hardware stays in space, the data it beamed home changed textbooks forever.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 3 Science Breakthrough Cards -->
+                    <div id="modalScienceGrid" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <!-- Injected by JS -->
+                    </div>
+
+                    <!-- Kid-Friendly Fun Comparison Box -->
+                    <div class="p-5 rounded-2xl bg-slate-950 border border-slate-800 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                        <div class="space-y-1">
+                            <span class="text-[10px] font-mono uppercase tracking-widest text-amber-400">KID-FRIENDLY TECH FACT</span>
+                            <p id="modalFunFact" class="text-sm text-slate-200"></p>
+                        </div>
+                        <button onclick="switchModalTab('restore')" class="px-4 py-2.5 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/40 font-mono text-xs shrink-0 transition-all">
+                            Restore & Quiz <i class="fa-solid fa-arrow-right ml-1"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- TAB 3: INTERACTIVE DUST RESTORATION & MISSION BADGE QUIZ -->
+                <div id="tabContent-restore" class="hidden space-y-6">
+                    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+                        <!-- Left: Interactive Dust-Wiping / Signal Alignment Mini-Game -->
+                        <div class="lg:col-span-6 p-5 rounded-2xl bg-slate-950 border border-slate-800 flex flex-col justify-between space-y-4">
+                            <div>
+                                <div class="flex items-center justify-between mb-1">
+                                    <span class="text-[11px] font-mono uppercase text-amber-400 flex items-center gap-1.5">
+                                        <i class="fa-solid fa-hand-sparkles"></i> STEP 1: INTERACTIVE RESTORATION
+                                    </span>
+                                    <span id="dustCleanPercentage" class="font-mono font-bold text-xs text-emerald-400">0% Restored</span>
+                                </div>
+                                <h4 id="dustTaskTitle" class="font-display font-bold text-base text-white">Brush the Dust Off My Solar Array!</h4>
+                                <p class="text-xs text-slate-400 mt-0.5">Drag your mouse or finger across the panel below (or click Boost) to wipe away cosmic dust and restore telemetry power.</p>
+                            </div>
+
+                            <!-- Interactive Scratch/Brush Canvas Wrapper -->
+                            <div class="relative w-full h-44 rounded-xl overflow-hidden border border-slate-700 select-none bg-slate-900 flex items-center justify-center">
+                                <!-- Underlying Clean Solar Panel / Hardware Core Graphic -->
+                                <div class="absolute inset-0 bg-gradient-to-br from-sky-900 via-indigo-950 to-slate-900 p-4 flex flex-col items-center justify-center text-center">
+                                    <div class="grid grid-cols-4 gap-1.5 w-full h-full opacity-40 absolute inset-0 p-2 pointer-events-none">
+                                        <div class="border border-cyan-400/50 bg-cyan-500/10 rounded"></div>
+                                        <div class="border border-cyan-400/50 bg-cyan-500/10 rounded"></div>
+                                        <div class="border border-cyan-400/50 bg-cyan-500/10 rounded"></div>
+                                        <div class="border border-cyan-400/50 bg-cyan-500/10 rounded"></div>
+                                        <div class="border border-cyan-400/50 bg-cyan-500/10 rounded"></div>
+                                        <div class="border border-cyan-400/50 bg-cyan-500/10 rounded"></div>
+                                        <div class="border border-cyan-400/50 bg-cyan-500/10 rounded"></div>
+                                        <div class="border border-cyan-400/50 bg-cyan-500/10 rounded"></div>
+                                    </div>
+                                    <i class="fa-solid fa-bolt text-amber-300 text-3xl mb-1 relative z-10 animate-bounce"></i>
+                                    <span class="font-display font-bold text-xs text-white relative z-10">SOLAR / SIGNAL ARRAY CLEAN!</span>
+                                    <span class="font-mono text-[11px] text-cyan-300 relative z-10">TELEMETRY SIGNAL: 100% LOCKED</span>
+                                </div>
+
+                                <!-- Foreground Scrubbable Dust Canvas -->
+                                <canvas id="dustCanvas" class="relative z-20 w-full h-full dust-canvas-cursor"></canvas>
+                            </div>
+
+                            <div class="flex items-center justify-between gap-2 pt-1">
+                                <button onclick="instantCleanDust()" class="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-mono text-amber-300 border border-amber-500/30 transition-all">
+                                    <i class="fa-solid fa-wand-sparkles mr-1"></i> Auto-Wipe Dust (100%)
+                                </button>
+                                <button onclick="resetDustCanvas()" class="px-3 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-xs font-mono text-slate-400 border border-slate-800 transition-all">
+                                    Reset Dust
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Right: 1-Question Mission Specialist Quiz -->
+                        <div class="lg:col-span-6 p-5 rounded-2xl bg-slate-950 border border-slate-800 flex flex-col justify-between space-y-4">
+                            <div>
+                                <span class="text-[11px] font-mono uppercase text-cyan-400 flex items-center gap-1.5 mb-1">
+                                    <i class="fa-solid fa-medal"></i> STEP 2: JUNIOR MISSION SPECIALIST CHECK
+                                </span>
+                                <h4 id="quizQuestionText" class="font-display font-bold text-base text-white leading-snug">
+                                    Question goes here?
+                                </h4>
+                            </div>
+
+                            <!-- Quiz Options Container -->
+                            <div id="quizOptionsContainer" class="space-y-2.5">
+                                <!-- Buttons injected by JS -->
+                            </div>
+
+                            <!-- Quiz Feedback Message Box -->
+                            <div id="quizFeedbackBox" class="hidden p-3.5 rounded-xl text-xs font-mono border"></div>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- EARNED BADGES VAULT MODAL -->
+    <div id="badgesModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-950/85 backdrop-blur-md">
+        <div class="w-full max-w-2xl rounded-3xl bg-slate-900 border border-slate-700 p-6 sm:p-8 shadow-2xl space-y-6">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400">
+                        <i class="fa-solid fa-award text-xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-display font-bold text-lg text-white">MISSION SPECIALIST BADGE VAULT</h3>
+                        <p class="text-xs text-slate-400 font-mono">Decode all 6 forgotten explorers by reading their logs and answering their science check!</p>
+                    </div>
+                </div>
+                <button onclick="toggleBadgesModal()" class="w-9 h-9 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <div id="badgesVaultGrid" class="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                <!-- Populated by JS -->
+            </div>
+
+            <div class="flex justify-end pt-2">
+                <button onclick="toggleBadgesModal()" class="px-5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-mono text-white">
+                    Continue Exploring
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer class="relative z-10 border-t border-slate-800/80 bg-slate-950/90 py-8 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-lg bg-orange-500/20 border border-orange-500/40 flex items-center justify-center text-orange-400">
+                    <i class="fa-solid fa-rocket text-sm"></i>
+                </div>
+                <div>
+                    <p class="font-display font-bold text-xs sm:text-sm text-white">
+                        Echoes in the Dust: NASA’s Forgotten Explorers
+                    </p>
+                    <p class="text-xs text-slate-400">
+                        Built by <span class="text-orange-400 font-semibold">Alfred Mathew Joseph</span> for the NASA Space Apps Challenge
+                    </p>
+                </div>
+            </div>
+            <div class="text-[11px] font-mono text-slate-400">
+                Challenge: <span class="text-slate-200">Abandoned but not Forgotten</span> • Interactive STEM Storytelling
+            </div>
+        </div>
+    </footer>
+
+    <!-- APPLICATION JAVASCRIPT -->
+    <script>
+        /********************************************************************
+         * 1. RICH DATASET: 6 ICONIC NASA HARDWARE RELICS
+         ********************************************************************/
+        const RELICS_DATA = [
+            {
+                id: 'oppy',
+                name: 'Opportunity Rover ("Oppy")',
+                sector: 'mars',
+                sectorLabel: 'Mars',
+                location: 'Perseverance Valley, Meridiani Planum',
+                coords: '2.04° S, 354.47° E',
+                radarPos: { x: 68, y: 36 },
+                years: '2004 – 2018 (14+ Years)',
+                status: 'DORMANT IN GLOBAL DUST STORM',
+                badgeTitle: 'Water Hunter Badge',
+                badgeIcon: 'fa-droplet',
+                accentColor: 'orange',
+                shortSummary: 'Designed for a 90-day mission, Oppy drove a marathon across Mars for nearly 15 years before a planet-wide dust storm blocked the sunlight to her solar panels.',
+                firstPersonStory: `Hi explorer! My name is Opportunity, though my engineers on Earth affectionately called me "Oppy." When I bounced onto the rusty plains of Mars inside giant airbags in January 2004, I was only supposed to work for 90 Martian days. Instead, I kept rolling for nearly 15 Earth years! I drove over 28 miles—the first marathon ever run on another planet—until a monster dust storm in 2018 turned the Martian sky pitch black.`,
+                lastWords: `"My battery is low and it's getting dark." (Poetic interpretation of final low-solar telemetry sent on June 10, 2018)`,
+                whyLeftBehind: `Opportunity relied on solar panels to charge her batteries. In June 2018, the fiercest Martian dust storm in decades blanketed the planet, blocking 99% of sunlight. Without power to run her internal heaters during the freezing Martian night, her electronics went to sleep forever in Perseverance Valley.`,
+                funFact: `Opportunity’s top speed was just 0.11 miles per hour—slower than a garden turtle—yet she still set the off-world driving distance record of 28.06 miles!`,
+                scienceUnlocked: [
+                    {
+                        title: 'Martian "Blueberries"',
+                        icon: 'fa-circle-dot',
+                        desc: 'Discovered thousands of tiny grey hematite spheres on the ground that only form in wet, watery environments.'
+                    },
+                    {
+                        title: 'Ancient Drinkable Water',
+                        icon: 'fa-water',
+                        desc: 'Found clay minerals inside Endeavour Crater proving ancient Mars once had neutral, non-acidic water where microbial life could have thrived.'
+                    },
+                    {
+                        title: 'First Meteorite on Another World',
+                        icon: 'fa-meteor',
+                        desc: 'Stumbled right across "Heat Shield Rock," the first iron-nickel meteorite ever identified on another planet!'
+                    }
+                ],
+                svgArt: `
+                    <svg viewBox="0 0 200 180" class="w-full h-full drop-shadow-[0_0_15px_rgba(249,115,22,0.45)]">
+                        <!-- Solar Wings -->
+                        <polygon points="15,95 75,75 185,95 125,115" fill="#1e3a8a" stroke="#38bdf8" stroke-width="2.5"/>
+                        <line x1="45" y1="85" x2="155" y2="105" stroke="#60a5fa" stroke-width="1"/>
+                        <line x1="75" y1="75" x2="125" y2="115" stroke="#60a5fa" stroke-width="1"/>
+                        <!-- Mast & Pancam Head -->
+                        <line x1="100" y1="95" x2="100" y2="38" stroke="#e2e8f0" stroke-width="5" stroke-linecap="round"/>
+                        <rect x="82" y="25" width="36" height="16" rx="4" fill="#f8fafc" stroke="#f97316" stroke-width="2"/>
+                        <circle cx="91" cy="33" r="4" fill="#ef4444"/>
+                        <circle cx="109" cy="33" r="4" fill="#38bdf8"/>
+                        <!-- Rocker-Bogie Wheels -->
+                        <line x1="65" y1="102" x2="50" y2="138" stroke="#94a3b8" stroke-width="4"/>
+                        <line x1="100" y1="108" x2="100" y2="144" stroke="#94a3b8" stroke-width="4"/>
+                        <line x1="135" y1="102" x2="150" y2="138" stroke="#94a3b8" stroke-width="4"/>
+                        <circle cx="50" cy="142" r="14" fill="#1e293b" stroke="#f97316" stroke-width="3"/>
+                        <circle cx="100" cy="148" r="14" fill="#1e293b" stroke="#f97316" stroke-width="3"/>
+                        <circle cx="150" cy="142" r="14" fill="#1e293b" stroke="#f97316" stroke-width="3"/>
+                    </svg>
+                `,
+                quiz: {
+                    question: 'What did Opportunity’s discovery of tiny hematite "blueberries" prove about ancient Mars?',
+                    options: [
+                        'Mars once had liquid water flowing or pooling on its surface',
+                        'Actual fruit bushes grew on Mars millions of years ago',
+                        'Mars has a solid diamond core beneath its crust'
+                    ],
+                    correctIndex: 0,
+                    explanation: 'Spot on! Hematite spherules ("blueberries") form in mineral-rich groundwater, proving Mars was once wet!'
+                }
+            },
+            {
+                id: 'ingenuity',
+                name: 'Ingenuity Mars Helicopter ("Ginny")',
+                sector: 'mars',
+                sectorLabel: 'Mars',
+                location: 'Valinor Hills, Jezero Crater',
+                coords: '18.49° N, 77.32° E',
+                radarPos: { x: 35, y: 28 },
+                years: '2021 – 2024 (72 Flights)',
+                status: 'RETIRED STATIONARY TESTBED',
+                badgeTitle: 'First Flyer Badge',
+                badgeIcon: 'fa-helicopter',
+                accentColor: 'orange',
+                shortSummary: 'The Wright Brothers moment on another planet! Planned for just 5 test flights, Ginny flew 72 times in thin Martian air before a rotor blade tip broke on landing.',
+                firstPersonStory: `Hello from Jezero Crater! I’m Ingenuity—or "Ginny"—and I weigh just 4 pounds on Earth (about as much as a chihuahua!). Many people doubted a helicopter could ever fly on Mars because the air here is 99% thinner than Earth's. To lift off, my carbon-fiber blades had to spin at an incredible 2,537 RPM! I was built for 5 test hops, but I ended up flying 72 times as an aerial scout for my best friend, the Perseverance rover.`,
+                lastWords: `"72 flights logged. Rotor blade damaged on touchdown, but my heart and solar computer still beat in the dunes of Valinor Hills." (January 2024)`,
+                whyLeftBehind: `On her 72nd flight on January 18, 2024, Ingenuity flew over featureless sand ripples that made optical navigation tricky. On touchdown, her fast-spinning rotor blades struck the sand dune, snapping a blade tip. While she can no longer fly, NASA reconfigured her to wake up daily and record Martian weather and avionics data for future explorers to collect!`,
+                funFact: `Tucked right underneath Ingenuity's solar panel is a real postage-stamp-sized piece of fabric from the Wright Brothers' 1903 Kitty Hawk airplane!`,
+                scienceUnlocked: [
+                    {
+                        title: 'Powered Flight on Another World',
+                        icon: 'fa-wind',
+                        desc: 'Proved aerodynamic flight is possible in an atmosphere with just 1% the density of Earth’s.'
+                    },
+                    {
+                        title: '3D Aerial Scouting for Rovers',
+                        icon: 'fa-camera',
+                        desc: 'Spotted boulder hazards and ancient river delta rocks from the sky so Perseverance could pick the safest science routes.'
+                    },
+                    {
+                        title: 'Long-Term Avionics Testbed',
+                        icon: 'fa-microchip',
+                        desc: 'Even while grounded, Ginny tests off-the-shelf smartphone-grade processors against Martian radiation.'
+                    }
+                ],
+                svgArt: `
+                    <svg viewBox="0 0 200 180" class="w-full h-full drop-shadow-[0_0_15px_rgba(56,189,248,0.45)]">
+                        <!-- Solar Panel Top -->
+                        <rect x="70" y="22" width="60" height="10" rx="2" fill="#0284c7" stroke="#bae6fd" stroke-width="2"/>
+                        <!-- Coaxial Rotors -->
+                        <ellipse cx="100" cy="45" rx="75" ry="7" fill="#334155" stroke="#f97316" stroke-width="2"/>
+                        <ellipse cx="100" cy="60" rx="75" ry="7" fill="#1e293b" stroke="#38bdf8" stroke-width="2"/>
+                        <!-- Mast & Tissue Box Fuselage -->
+                        <line x1="100" y1="32" x2="100" y2="75" stroke="#e2e8f0" stroke-width="5"/>
+                        <rect x="76" y="75" width="48" height="42" rx="6" fill="#cbd5e1" stroke="#f8fafc" stroke-width="2"/>
+                        <circle cx="100" cy="96" r="8" fill="#0f172a" stroke="#f97316" stroke-width="2"/>
+                        <!-- 4 Spindly Landing Legs -->
+                        <line x1="80" y1="115" x2="42" y2="155" stroke="#94a3b8" stroke-width="3" stroke-linecap="round"/>
+                        <line x1="88" y1="115" x2="68" y2="158" stroke="#64748b" stroke-width="3" stroke-linecap="round"/>
+                        <line x1="120" y1="115" x2="158" y2="155" stroke="#94a3b8" stroke-width="3" stroke-linecap="round"/>
+                        <line x1="112" y1="115" x2="132" y2="158" stroke="#64748b" stroke-width="3" stroke-linecap="round"/>
+                    </svg>
+                `,
+                quiz: {
+                    question: 'Why did Ingenuity’s rotor blades have to spin ~5 times faster than an Earth helicopter?',
+                    options: [
+                        'Because the Martian atmosphere is about 99% thinner than Earth’s air',
+                        'Because Mars has 10 times stronger gravity than Earth',
+                        'To blow away Martian sandstorms from the Perseverance rover'
+                    ],
+                    correctIndex: 0,
+                    explanation: 'Correct! With air 99% thinner than Earth’s, Ginny’s blades had to spin at ~2,500 RPM just to get enough lift!'
+                }
+            },
+            {
+                id: 'apollo15lrv',
+                name: 'Apollo 15 Lunar Roving Vehicle ("Moon Buggy")',
+                sector: 'moon',
+                sectorLabel: 'The Moon',
+                location: 'Hadley–Apennine Valley',
+                coords: '26.13° N, 3.63° E',
+                radarPos: { x: 28, y: 65 },
+                years: 'July – August 1971',
+                status: 'PARKED IN LUNAR VACUUM',
+                badgeTitle: 'Lunar Driver Badge',
+                badgeIcon: 'fa-car-side',
+                accentColor: 'cyan',
+                shortSummary: 'The first car humans ever drove on another world! Folded up like a lawn chair inside the Lunar Module, it let astronauts explore mountains and canyons on the Moon.',
+                firstPersonStory: `Greetings from the foot of the Apennine Mountains on the Moon! Back in July 1971, astronauts Dave Scott and Jim Irwin unfolded me from the side of their lunar lander like a high-tech origami lawn chair. Before me, astronauts could only walk a short distance from their spacecraft. With my woven piano-wire mesh wheels and electric motors, we cruised 17.2 miles across craters and steep mountain slopes!`,
+                lastWords: `"Parked at VIP site facing the Lunar Module Falcon—filming my crew blast off back to Earth." (August 2, 1971)`,
+                whyLeftBehind: `Rocket fuel is precious! Every pound lifted off the Moon required massive amounts of propellant in the Lunar Module Ascent Stage. Leaving the 460-pound Moon Buggy behind allowed the astronauts to bring home 170 pounds of priceless lunar rocks instead.`,
+                funFact: `Instead of rubber tires filled with air (which would pop in the vacuum of space), the Moon Buggy used flexible tires woven out of zinc-coated piano wire!`,
+                scienceUnlocked: [
+                    {
+                        title: 'The 4-Billion-Year-Old "Genesis Rock"',
+                        icon: 'fa-gem',
+                        desc: 'Allowed astronauts to reach Spur Crater, where they found pristine anorthosite rock from the Moon’s original crust.'
+                    },
+                    {
+                        title: 'Exploring Hadley Rille Canyon',
+                        icon: 'fa-mountain',
+                        desc: 'Drove right up to the edge of a giant ancient lava channel, revealing volcanic bedrock layers.'
+                    },
+                    {
+                        title: 'Deep Lunar Soil Cores',
+                        icon: 'fa-screwdriver-wrench',
+                        desc: 'Carried heavy geological drills that extracted 8-foot-deep soil samples containing billions of years of solar history.'
+                    }
+                ],
+                svgArt: `
+                    <svg viewBox="0 0 200 180" class="w-full h-full drop-shadow-[0_0_15px_rgba(34,211,238,0.45)]">
+                        <!-- High Gain Umbrella Antenna -->
+                        <line x1="65" y1="105" x2="65" y2="48" stroke="#cbd5e1" stroke-width="3"/>
+                        <path d="M 40 48 Q 65 22 90 48 Z" fill="none" stroke="#f59e0b" stroke-width="3"/>
+                        <!-- Chassis & Lawn-Chair Seats -->
+                        <line x1="38" y1="115" x2="162" y2="115" stroke="#e2e8f0" stroke-width="6" stroke-linecap="round"/>
+                        <polyline points="85,82 85,112 105,112" fill="none" stroke="#38bdf8" stroke-width="4"/>
+                        <polyline points="118,82 118,112 138,112" fill="none" stroke="#38bdf8" stroke-width="4"/>
+                        <!-- Wire Mesh Wheels with Gold Fenders -->
+                        <path d="M 30 112 A 26 26 0 0 1 76 112" fill="none" stroke="#f59e0b" stroke-width="4"/>
+                        <path d="M 124 112 A 26 26 0 0 1 170 112" fill="none" stroke="#f59e0b" stroke-width="4"/>
+                        <circle cx="53" cy="128" r="22" fill="#0f172a" stroke="#94a3b8" stroke-width="4" stroke-dasharray="4 3"/>
+                        <circle cx="147" cy="128" r="22" fill="#0f172a" stroke="#94a3b8" stroke-width="4" stroke-dasharray="4 3"/>
+                        <circle cx="53" cy="128" r="7" fill="#f59e0b"/>
+                        <circle cx="147" cy="128" r="7" fill="#f59e0b"/>
+                    </svg>
+                `,
+                quiz: {
+                    question: 'Why did the Apollo astronauts leave their Lunar Roving Vehicles behind on the Moon?',
+                    options: [
+                        'Saving weight on liftoff allowed them to bring home heavy Moon rocks instead',
+                        'They forgot where they parked them in the dark',
+                        'The buggies were glued to the lunar dust'
+                    ],
+                    correctIndex: 0,
+                    explanation: 'Exactly right! Leaving the rovers behind freed up strict rocket weight limits so astronauts could carry hundreds of pounds of Moon rocks back to Earth.'
+                }
+            },
+            {
+                id: 'insight',
+                name: 'InSight Mars Lander',
+                sector: 'mars',
+                sectorLabel: 'Mars',
+                location: 'Elysium Planitia',
+                coords: '4.50° N, 135.62° E',
+                radarPos: { x: 73, y: 68 },
+                years: '2018 – 2022',
+                status: 'SILENCED BY SOLAR DUST',
+                badgeTitle: 'Planet Doctor Badge',
+                badgeIcon: 'fa-heart-pulse',
+                accentColor: 'orange',
+                shortSummary: 'Unlike rovers that drive around, InSight stayed in one spot and placed a hyper-sensitive stethoscope on Mars—detecting over 1,300 "marsquakes"!',
+                firstPersonStory: `Shhh... listen closely! I’m the InSight Lander. While my cousins Opportunity and Perseverance loved driving across craters, my job required standing completely still on the flat plains of Elysium Planitia. Using my robotic arm, I placed a dome-covered seismometer directly onto the Martian ground. For four years, I listened to the heartbeat of Mars—feeling over 1,300 marsquakes and meteor impacts rumble through the planet!`,
+                lastWords: `"Don't worry about me: my time here has been both productive and serene. Signing off." (Final selfie & transmission, Dec 2022)`,
+                whyLeftBehind: `As a stationary geophysical lander, InSight was never meant to leave Mars. Over 4 years, fine rusty Martian dust settled like a thick blanket over its two round solar panels. Rather than turning off its seismometer early to power dust-cleaning brushes, scientists chose to maximize quake detection until the very last drop of battery power.`,
+                funFact: `InSight’s seismometer was so sensitive it could detect ground vibrations smaller than the width of a single hydrogen atom!`,
+                scienceUnlocked: [
+                    {
+                        title: '1,319 Marsquakes Detected',
+                        icon: 'fa-wave-square',
+                        desc: 'Proved Mars is still seismically active today as its interior slowly cools and shrinks.'
+                    },
+                    {
+                        title: 'Mapped Mars’s Liquid Core',
+                        icon: 'fa-earth-americas',
+                        desc: 'Used seismic waves like an ultrasound to reveal Mars has a large liquid iron-alloy core rich in lighter elements.'
+                    },
+                    {
+                        title: 'Heard Meteoroids Striking Mars',
+                        icon: 'fa-explosion',
+                        desc: 'Detected the shockwaves of space rocks slamming into Mars, which orbiters later photographed as fresh craters!'
+                    }
+                ],
+                svgArt: `
+                    <svg viewBox="0 0 200 180" class="w-full h-full drop-shadow-[0_0_15px_rgba(249,115,22,0.45)]">
+                        <!-- Twin Circular Solar Arrays -->
+                        <circle cx="42" cy="85" r="32" fill="#1e3a8a" stroke="#f97316" stroke-width="3"/>
+                        <circle cx="158" cy="85" r="32" fill="#1e3a8a" stroke="#f97316" stroke-width="3"/>
+                        <line x1="42" y1="53" x2="42" y2="117" stroke="#38bdf8" stroke-width="1"/>
+                        <line x1="158" y1="53" x2="158" y2="117" stroke="#38bdf8" stroke-width="1"/>
+                        <!-- Central Deck -->
+                        <rect x="74" y="72" width="52" height="28" rx="4" fill="#cbd5e1" stroke="#f8fafc" stroke-width="2"/>
+                        <!-- Robotic Arm & Seismometer Dome on Ground -->
+                        <polyline points="105,72 125,45 145,135" fill="none" stroke="#94a3b8" stroke-width="4" stroke-linecap="round"/>
+                        <path d="M 128 148 Q 145 122 162 148 Z" fill="#f59e0b" stroke="#fef08a" stroke-width="2"/>
+                        <!-- Landing Legs -->
+                        <line x1="80" y1="100" x2="65" y2="145" stroke="#64748b" stroke-width="4"/>
+                        <line x1="120" y1="100" x2="115" y2="145" stroke="#64748b" stroke-width="4"/>
+                    </svg>
+                `,
+                quiz: {
+                    question: 'How did the InSight lander figure out what is deep inside the center of Mars?',
+                    options: [
+                        'By listening to seismic waves from over 1,300 "marsquakes" travel through the planet',
+                        'By drilling a tunnel 2,000 miles down to the core',
+                        'By taking X-ray photos from Earth telescopes'
+                    ],
+                    correctIndex: 0,
+                    explanation: 'Bravo! Just like doctors use ultrasound, scientists used marsquake vibrations recorded by InSight to measure Mars’s crust, mantle, and liquid core!'
+                }
+            },
+            {
+                id: 'apollo11lrrr',
+                name: 'Apollo 11 Laser Retroreflector (LRRR)',
+                sector: 'moon',
+                sectorLabel: 'The Moon',
+                location: 'Mare Tranquillitatis (Sea of Tranquility)',
+                coords: '0.67° N, 23.47° E',
+                radarPos: { x: 64, y: 48 },
+                years: 'July 20, 1969 – PRESENT!',
+                status: 'STILL WORKING AFTER 55+ YEARS!',
+                badgeTitle: 'Laser Ranger Badge',
+                badgeIcon: 'fa-bullseye',
+                accentColor: 'cyan',
+                shortSummary: 'Left in the footprints of Neil Armstrong and Buzz Aldrin in 1969, this suitcase-sized mirror panel requires zero battery power and STILL bounces Earth lasers back today!',
+                firstPersonStory: `Wait—not everything left behind in space is broken! I’m the Laser Ranging Retroreflector placed on the Moon by Apollo 11 astronauts Neil Armstrong and Buzz Aldrin during humanity's very first moonwalk in July 1969. Because I am made of 100 ultra-pure quartz corner-cube mirrors and need zero electricity, I am STILL working today! Whenever scientists on Earth fire a laser beam at me, I bounce the light right back to measure the exact distance to the Moon.`,
+                lastWords: `"Still online! Bouncing laser pulses back to Earth telescopes with millimeter precision since July 20, 1969."`,
+                whyLeftBehind: `I was specifically designed to stay on the Moon forever as a permanent optical target! Because the Moon has no wind or rain, my quartz prism mirrors have remained operational for more than half a century.`,
+                funFact: `Thanks to these Apollo mirrors, scientists discovered that the Moon is slowly spiraling away from Earth at about 1.5 inches (3.8 cm) every single year—the same speed your fingernails grow!`,
+                scienceUnlocked: [
+                    {
+                        title: 'The Moon Is Drifting Away!',
+                        icon: 'fa-arrows-left-right',
+                        desc: 'Measured the Moon’s distance down to a few millimeters, proving it recedes 3.8 cm per year.'
+                    },
+                    {
+                        title: 'Testing Einstein’s Gravity',
+                        icon: 'fa-scale-balanced',
+                        desc: 'Confirmed Albert Einstein’s General Theory of Relativity by proving Earth and the Moon fall toward the Sun at the same rate.'
+                    },
+                    {
+                        title: 'Revealed a Fluid Lunar Core',
+                        icon: 'fa-moon',
+                        desc: 'Tiny wobbles in the laser reflections revealed the Moon has a partially fluid core deep inside.'
+                    }
+                ],
+                svgArt: `
+                    <svg viewBox="0 0 200 180" class="w-full h-full drop-shadow-[0_0_15px_rgba(34,211,238,0.5)]">
+                        <!-- Incoming / Outgoing Green Laser Beam -->
+                        <line x1="175" y1="15" x2="105" y2="90" stroke="#10b981" stroke-width="4" stroke-dasharray="6 4"/>
+                        <circle cx="105" cy="90" r="8" fill="#34d399"/>
+                        <!-- Tilted Retroreflector Array Frame -->
+                        <polygon points="45,115 85,65 155,80 115,130" fill="#1e293b" stroke="#38bdf8" stroke-width="3"/>
+                        <!-- Corner Cube Mirror Grid -->
+                        <circle cx="85" cy="85" r="6" fill="#bae6fd"/>
+                        <circle cx="105" cy="90" r="6" fill="#bae6fd"/>
+                        <circle cx="125" cy="95" r="6" fill="#bae6fd"/>
+                        <circle cx="75" cy="102" r="6" fill="#bae6fd"/>
+                        <circle cx="95" cy="107" r="6" fill="#bae6fd"/>
+                        <circle cx="115" cy="112" r="6" fill="#bae6fd"/>
+                        <!-- Support Stand on Lunar Regolith -->
+                        <line x1="65" y1="122" x2="55" y2="148" stroke="#94a3b8" stroke-width="4"/>
+                        <line x1="125" y1="128" x2="135" y2="148" stroke="#94a3b8" stroke-width="4"/>
+                        <line x1="35" y1="148" x2="165" y2="148" stroke="#64748b" stroke-width="4" stroke-linecap="round"/>
+                    </svg>
+                `,
+                quiz: {
+                    question: 'How is the 1969 Apollo 11 Laser Retroreflector STILL working on the Moon today?',
+                    options: [
+                        'It uses passive quartz corner-cube mirrors that bounce Earth laser beams back without needing batteries',
+                        'Astronauts fly up every 5 years to change its AA batteries',
+                        'It runs on lunar wind turbines'
+                    ],
+                    correctIndex: 0,
+                    explanation: 'Spot on! Because corner-cube mirrors reflect light purely through physics and require zero electrical power, the Apollo 11 array still works today!'
+                }
+            },
+            {
+                id: 'voyager1',
+                name: 'Voyager 1 & The Golden Record',
+                sector: 'deepspace',
+                sectorLabel: 'Deep Space',
+                location: 'Interstellar Space (Beyond the Heliosphere)',
+                coords: '15.4+ Billion Miles from Earth',
+                radarPos: { x: 50, y: 22 },
+                years: 'Sept 5, 1977 – PRESENT',
+                status: 'INTERSTELLAR MESSENGER',
+                badgeTitle: 'Interstellar Envoy Badge',
+                badgeIcon: 'fa-compact-disc',
+                accentColor: 'purple',
+                shortSummary: 'The farthest human-made object in history! Having turned off its cameras decades ago to save power, it carries a Golden Phonograph Record into the Milky Way.',
+                firstPersonStory: `Hello from the stars between the stars! I am Voyager 1. Launched in 1977, I flew past giant Jupiter and ringed Saturn before heading out of our solar system forever. To save my fading plutonium power supply, engineers had to switch off my cameras after I snapped the famous "Pale Blue Dot" photo of Earth in 1990. Even after my last radio transmitter goes quiet in the 2030s, I will carry a gold-plated phonograph record holding Earth's music, greetings in 55 languages, and whale songs for over a billion years!`,
+                lastWords: `"Still whispering across 22+ light-hours of deep space—carrying the Golden Record into eternity."`,
+                whyLeftBehind: `Voyager 1 was launched on a high-speed gravity-assist trajectory moving at 38,000 mph—fast enough to escape the Sun's gravity forever. It is humanity's permanent time capsule drifting through the Milky Way galaxy.`,
+                funFact: `It takes over 22 hours for a radio signal traveling at the speed of light to go one way from Voyager 1 back to NASA’s Deep Space Network on Earth!`,
+                scienceUnlocked: [
+                    {
+                        title: 'Active Volcanoes on Jupiter’s Moon Io',
+                        icon: 'fa-volcano',
+                        desc: 'Discovered the first active volcanoes outside Earth erupting on Jupiter’s moon Io.'
+                    },
+                    {
+                        title: 'First Crossing into Interstellar Space',
+                        icon: 'fa-star',
+                        desc: 'In 2012, Voyager 1 crossed the heliopause to sample the cosmic rays of interstellar space.'
+                    },
+                    {
+                        title: 'The "Pale Blue Dot" Portrait',
+                        icon: 'fa-camera-retro',
+                        desc: 'Turned its camera backward from 3.7 billion miles away to show Earth as a tiny pixel in a sunbeam.'
+                    }
+                ],
+                svgArt: `
+                    <svg viewBox="0 0 200 180" class="w-full h-full drop-shadow-[0_0_15px_rgba(168,85,247,0.5)]">
+                        <!-- Long Magnetometer Boom & RTG Boom -->
+                        <line x1="100" y1="95" x2="20" y2="150" stroke="#94a3b8" stroke-width="3"/>
+                        <line x1="100" y1="95" x2="178" y2="140" stroke="#cbd5e1" stroke-width="4"/>
+                        <!-- Giant White High-Gain Dish Antenna -->
+                        <ellipse cx="100" cy="78" rx="52" ry="30" fill="#f8fafc" stroke="#a855f7" stroke-width="3"/>
+                        <ellipse cx="100" cy="78" rx="22" ry="12" fill="none" stroke="#94a3b8" stroke-width="1.5"/>
+                        <line x1="78" y1="78" x2="100" y2="48" stroke="#64748b" stroke-width="2"/>
+                        <line x1="122" y1="78" x2="100" y2="48" stroke="#64748b" stroke-width="2"/>
+                        <circle cx="100" cy="48" r="5" fill="#a855f7"/>
+                        <!-- Iconic Golden Record Mounted on Bus -->
+                        <rect x="82" y="106" width="36" height="24" rx="3" fill="#334155" stroke="#cbd5e1" stroke-width="2"/>
+                        <circle cx="100" cy="118" r="9" fill="#fbbf24" stroke="#fef08a" stroke-width="2"/>
+                        <circle cx="100" cy="118" r="2.5" fill="#78350f"/>
+                    </svg>
+                `,
+                quiz: {
+                    question: 'What special artifact is bolted to the side of Voyager 1 for any future space travelers to find?',
+                    options: [
+                        'The Golden Record—a time capsule of Earth sounds, music, photos, and greetings in 55 languages',
+                        'A Spare Apollo Moon Buggy wheel',
+                        'A jar of Martian soil from Jezero Crater'
+                    ],
+                    correctIndex: 0,
+                    explanation: 'Awesome job! The Golden Record carries greetings, whale songs, brainwaves, and 115 images of Earth across the Milky Way!'
+                }
+            }
+        ];
+
+        /********************************************************************
+         * 2. STATE MANAGEMENT & WEB AUDIO SYNTHESIZER
+         ********************************************************************/
+        let currentSector = 'all';
+        let activeRelic = null;
+        let decodedRelics = new Set();
+        let soundEnabled = true;
+        let audioCtx = null;
+        let typewriterTimer = null;
+
+        // Initialize Web Audio Context lazily on user interaction
+        function getAudioContext() {
+            if (!audioCtx) {
+                const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+                if (AudioContextClass) {
+                    audioCtx = new AudioContextClass();
+                }
+            }
+            if (audioCtx && audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            return audioCtx;
+        }
+
+        function playTone(freq = 440, duration = 0.08, type = 'sine', volume = 0.08) {
+            if (!soundEnabled) return;
+            try {
+                const ctx = getAudioContext();
+                if (!ctx) return;
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = type;
+                osc.frequency.setValueAtTime(freq, ctx.currentTime);
+                gain.gain.setValueAtTime(volume, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.start();
+                osc.stop(ctx.currentTime + duration);
+            } catch (e) {
+                // Ignore audio errors if blocked
+            }
+        }
+
+        function playBadgeUnlockFanfare() {
+            if (!soundEnabled) return;
+            const notes = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
+            notes.forEach((note, idx) => {
+                setTimeout(() => playTone(note, 0.18, 'triangle', 0.12), idx * 95);
+            });
+        }
+
+        function toggleSound() {
+            soundEnabled = !soundEnabled;
+            const icon = document.getElementById('soundIcon');
+            if (soundEnabled) {
+                icon.className = 'fa-solid fa-volume-high text-emerald-400';
+                playTone(660, 0.08, 'sine');
+            } else {
+                icon.className = 'fa-solid fa-volume-xmark text-slate-500';
+            }
+        }
+
+        /********************************************************************
+         * 3. DYNAMIC THEME SHIFTING & SECTOR FILTERING
+         ********************************************************************/
+        const SECTOR_THEMES = {
+            all: {
+                title: 'SOLAR SYSTEM WIDE (6 RELICS)',
+                primary: '#f97316',
+                glow: 'rgba(249, 115, 22, 0.35)',
+                ambient: 'radial-gradient(circle at 50% 15%, rgba(249, 115, 22, 0.14), rgba(56, 189, 248, 0.07) 45%, transparent 75%)',
+                particleColor: '249, 115, 22'
+            },
+            mars: {
+                title: 'MARS SECTOR // RUSTY PLAINS & CRATERS',
+                primary: '#f97316',
+                glow: 'rgba(249, 115, 22, 0.4)',
+                ambient: 'radial-gradient(circle at 50% 15%, rgba(239, 68, 68, 0.16), rgba(249, 115, 22, 0.08) 50%, transparent 75%)',
+                particleColor: '251, 146, 60'
+            },
+            moon: {
+                title: 'LUNAR SECTOR // APOLLO LANDING SITES',
+                primary: '#22d3ee',
+                glow: 'rgba(34, 211, 238, 0.38)',
+                ambient: 'radial-gradient(circle at 50% 15%, rgba(34, 211, 238, 0.15), rgba(148, 163, 184, 0.08) 50%, transparent 75%)',
+                particleColor: '56, 189, 248'
+            },
+            deepspace: {
+                title: 'INTERSTELLAR SECTOR // BEYOND HELIOPAUSE',
+                primary: '#a855f7',
+                glow: 'rgba(168, 85, 247, 0.4)',
+                ambient: 'radial-gradient(circle at 50% 15%, rgba(168, 85, 247, 0.17), rgba(99, 102, 241, 0.08) 50%, transparent 75%)',
+                particleColor: '192, 132, 252'
+            }
+        };
+
+        function setSector(sector) {
+            currentSector = sector;
+            playTone(480, 0.07, 'sine');
+
+            const theme = SECTOR_THEMES[sector];
+            document.documentElement.style.setProperty('--accent-primary', theme.primary);
+            document.documentElement.style.setProperty('--accent-glow', theme.glow);
+            document.getElementById('ambientGlow').style.background = theme.ambient;
+            document.getElementById('radarSectorTitle').textContent = theme.title;
+
+            // Update active button styles
+            ['all', 'mars', 'moon', 'deepspace'].forEach(key => {
+                const btn = document.getElementById(`sectorBtn-${key}`);
+                if (key === sector) {
+                    btn.className = 'sector-btn px-4 py-2.5 rounded-xl font-display font-bold text-xs tracking-wider uppercase transition-all flex items-center justify-center gap-2 bg-gradient-to-r from-orange-500 to-amber-600 text-white shadow-md';
+                    if (sector === 'moon') {
+                        btn.className = 'sector-btn px-4 py-2.5 rounded-xl font-display font-bold text-xs tracking-wider uppercase transition-all flex items-center justify-center gap-2 bg-gradient-to-r from-cyan-500 to-sky-600 text-white shadow-md';
+                    } else if (sector === 'deepspace') {
+                        btn.className = 'sector-btn px-4 py-2.5 rounded-xl font-display font-bold text-xs tracking-wider uppercase transition-all flex items-center justify-center gap-2 bg-gradient-to-r from-purple-500 to-indigo-600 text-white shadow-md';
+                    }
+                } else {
+                    btn.className = 'sector-btn px-4 py-2.5 rounded-xl font-display font-bold text-xs tracking-wider uppercase transition-all flex items-center justify-center gap-2 text-slate-300 hover:text-white hover:bg-slate-800/70';
+                }
+            });
+
+            renderHardwareGridAndRadar();
+        }
+
+        /********************************************************************
+         * 4. RENDER HARDWARE CARDS & SYNCED ORBITAL RADAR BLIPS
+         ********************************************************************/
+        function renderHardwareGridAndRadar() {
+            const grid = document.getElementById('hardwareGrid');
+            const radarContainer = document.getElementById('radarBlipsContainer');
+            grid.innerHTML = '';
+            radarContainer.innerHTML = '';
+
+            const filteredRelics = currentSector === 'all'
+                ? RELICS_DATA
+                : RELICS_DATA.filter(r => r.sector === currentSector);
+
+            filteredRelics.forEach((relic) => {
+                const isDecoded = decodedRelics.has(relic.id);
+
+                // 1. Create Synced Radar Blip
+                const blip = document.createElement('button');
+                blip.style.left = `${relic.radarPos.x}%`;
+                blip.style.top = `${relic.radarPos.y}%`;
+                blip.className = `absolute -translate-x-1/2 -translate-y-1/2 group focus:outline-none z-20`;
+                blip.innerHTML = `
+                    <span class="relative flex h-4 w-4">
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full ${isDecoded ? 'bg-emerald-400' : 'bg-orange-400'} opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-4 w-4 ${isDecoded ? 'bg-emerald-500 border-emerald-200' : 'bg-orange-500 border-orange-200'} border-2 shadow-lg"></span>
+                    </span>
+                `;
+                blip.onmouseenter = () => highlightRadarReadout(relic);
+                blip.onclick = () => openRelicModal(relic.id);
+                radarContainer.appendChild(blip);
+
+                // 2. Create Hardware Card
+                const badgeColorMap = {
+                    orange: 'bg-orange-500/15 text-orange-300 border-orange-500/30',
+                    cyan: 'bg-cyan-500/15 text-cyan-300 border-cyan-500/30',
+                    purple: 'bg-purple-500/15 text-purple-300 border-purple-500/30'
+                };
+
+                const card = document.createElement('article');
+                card.className = `cosmic-card rounded-3xl p-5 flex flex-col justify-between cursor-pointer group relative overflow-hidden`;
+                card.onmouseenter = () => highlightRadarReadout(relic);
+                card.onclick = () => openRelicModal(relic.id);
+
+                card.innerHTML = `
+                    <div>
+                        <!-- Card Top Metadata -->
+                        <div class="flex items-center justify-between gap-2 mb-3">
+                            <span class="px-2.5 py-1 rounded-lg text-[11px] font-mono font-bold uppercase border ${badgeColorMap[relic.accentColor]}">
+                                ${relic.sectorLabel}
+                            </span>
+                            ${isDecoded
+                                ? `<span class="px-2.5 py-1 rounded-lg text-[11px] font-mono font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 flex items-center gap-1.5">
+                                       <i class="fa-solid fa-circle-check"></i> DECODED
+                                   </span>`
+                                : `<span class="px-2.5 py-1 rounded-lg text-[11px] font-mono text-slate-400 bg-slate-900/90 border border-slate-700/80 flex items-center gap-1.5">
+                                       <span class="w-1.5 h-1.5 rounded-full bg-orange-400 animate-pulse"></span> SIGNAL READY
+                                   </span>`
+                            }
+                        </div>
+
+                        <!-- SVG Illustration Preview -->
+                        <div class="w-full h-36 rounded-2xl bg-slate-950/85 border border-slate-800/90 p-3 mb-4 flex items-center justify-center relative overflow-hidden group-hover:border-slate-700 transition-all">
+                            <div class="w-32 h-32 group-hover:scale-110 transition-transform duration-500">
+                                ${relic.svgArt}
+                            </div>
+                            <span class="absolute bottom-2 right-2.5 text-[10px] font-mono text-slate-500">${relic.coords}</span>
+                        </div>
+
+                        <!-- Relic Title & Location -->
+                        <h3 class="font-display font-bold text-lg text-white group-hover:text-orange-300 transition-colors">
+                            ${relic.name}
+                        </h3>
+                        <p class="text-xs font-mono text-slate-400 mt-0.5 mb-2.5">
+                            <i class="fa-solid fa-location-dot text-orange-400 mr-1"></i> ${relic.location} • ${relic.years}
+                        </p>
+                        <p class="text-xs sm:text-sm text-slate-300 line-clamp-3 leading-relaxed">
+                            ${relic.shortSummary}
+                        </p>
+                    </div>
+
+                    <!-- Card Footer Action -->
+                    <div class="mt-5 pt-3.5 border-t border-slate-800/80 flex items-center justify-between">
+                        <span class="text-[11px] font-mono text-slate-400 flex items-center gap-1.5">
+                            <i class="fa-solid ${relic.badgeIcon} text-amber-400"></i> ${relic.badgeTitle}
+                        </span>
+                        <span class="text-xs font-display font-bold text-orange-400 group-hover:translate-x-1 transition-transform flex items-center gap-1">
+                            OPEN LOG <i class="fa-solid fa-chevron-right text-[10px]"></i>
+                        </span>
+                    </div>
+                `;
+
+                grid.appendChild(card);
+            });
+        }
+
+        function highlightRadarReadout(relic) {
+            playTone(620, 0.03, 'sine', 0.03);
+            document.getElementById('radarReadoutName').textContent = relic.name;
+            document.getElementById('radarReadoutCoords').textContent = `${relic.sectorLabel.toUpperCase()} // ${relic.coords}`;
+        }
+
+        function openRandomRelic() {
+            const randomItem = RELICS_DATA[Math.floor(Math.random() * RELICS_DATA.length)];
+            openRelicModal(randomItem.id);
+        }
+
+        /********************************************************************
+         * 5. RELIC MODAL, TYPEWRITER LOG, & INTERACTIVE DUST CLEANER
+         ********************************************************************/
+        function openRelicModal(relicId) {
+            const relic = RELICS_DATA.find(r => r.id === relicId);
+            if (!relic) return;
+            activeRelic = relic;
+            playTone(540, 0.09, 'triangle');
+
+            // Populate Header
+            document.getElementById('modalSectorBadge').textContent = relic.sectorLabel.toUpperCase();
+            document.getElementById('modalRelicTitle').textContent = relic.name;
+            document.getElementById('modalRelicSubtitle').textContent = `${relic.location} • ${relic.years}`;
+
+            // Populate Tab 1 (Echo Log)
+            document.getElementById('modalSvgIllustration').innerHTML = relic.svgArt;
+            document.getElementById('modalStatusPill').textContent = `STATUS: ${relic.status}`;
+            document.getElementById('modalLastWords').textContent = relic.lastWords;
+            document.getElementById('modalWhyLeftBehind').textContent = relic.whyLeftBehind;
+
+            // Populate Tab 2 (Science Unlocked)
+            const scienceGrid = document.getElementById('modalScienceGrid');
+            scienceGrid.innerHTML = relic.scienceUnlocked.map(item => `
+                <div class="p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-2 hover:border-cyan-500/50 transition-all">
+                    <div class="w-10 h-10 rounded-xl bg-cyan-500/15 border border-cyan-500/30 flex items-center justify-center text-cyan-400">
+                        <i class="fa-solid ${item.icon} text-lg"></i>
+                    </div>
+                    <h5 class="font-display font-bold text-sm text-white">${item.title}</h5>
+                    <p class="text-xs text-slate-300 leading-relaxed">${item.desc}</p>
+                </div>
+            `).join('');
+            document.getElementById('modalFunFact').textContent = relic.funFact;
+
+            // Populate Tab 3 (Dust Cleaner & Quiz)
+            setupQuizForRelic(relic);
+
+            // Show Modal & Start on Tab 1
+            const modal = document.getElementById('relicModal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            switchModalTab('story');
+            startTypewriter(relic.firstPersonStory);
+        }
+
+        function closeRelicModal() {
+            playTone(340, 0.07, 'sine');
+            const modal = document.getElementById('relicModal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            if (typewriterTimer) clearInterval(typewriterTimer);
+        }
+
+        function switchModalTab(tabName) {
+            playTone(580, 0.05, 'sine');
+            ['story', 'science', 'restore'].forEach(tab => {
+                const btn = document.getElementById(`tabBtn-${tab}`);
+                const content = document.getElementById(`tabContent-${tab}`);
+                if (tab === tabName) {
+                    content.classList.remove('hidden');
+                    btn.className = 'modal-tab-btn px-4 py-2.5 rounded-t-xl font-display font-bold text-xs uppercase tracking-wider border-b-2 border-orange-500 text-white bg-slate-900/90 flex items-center gap-2 transition-all';
+                } else {
+                    content.classList.add('hidden');
+                    btn.className = 'modal-tab-btn px-4 py-2.5 rounded-t-xl font-display font-bold text-xs uppercase tracking-wider border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center gap-2 transition-all';
+                }
+            });
+
+            if (tabName === 'restore') {
+                setTimeout(() => initDustCanvas(), 60);
+            }
+        }
+
+        function startTypewriter(fullText) {
+            if (typewriterTimer) clearInterval(typewriterTimer);
+            const target = document.getElementById('typewriterText');
+            target.textContent = '';
+            target.classList.add('typewriter-cursor');
+            let idx = 0;
+
+            typewriterTimer = setInterval(() => {
+                if (idx < fullText.length) {
+                    target.textContent += fullText.charAt(idx);
+                    idx++;
+                } else {
+                    clearInterval(typewriterTimer);
+                    target.classList.remove('typewriter-cursor');
+                }
+            }, 16);
+        }
+
+        function finishTypewriterImmediately() {
+            if (!activeRelic) return;
+            if (typewriterTimer) clearInterval(typewriterTimer);
+            const target = document.getElementById('typewriterText');
+            target.textContent = activeRelic.firstPersonStory;
+            target.classList.remove('typewriter-cursor');
+        }
+
+        /********************************************************************
+         * 6. INTERACTIVE SOLAR DUST SCRUBBING MINI-GAME (HTML5 CANVAS)
+         ********************************************************************/
+        let dustCtx = null;
+        let isScrubbing = false;
+
+        function initDustCanvas() {
+            const canvas = document.getElementById('dustCanvas');
+            if (!canvas) return;
+            const rect = canvas.getBoundingClientRect();
+            canvas.width = rect.width || 360;
+            canvas.height = rect.height || 176;
+            dustCtx = canvas.getContext('2d');
+
+            drawDustLayer();
+
+            // Mouse & Touch Events for wiping dust
+            canvas.onmousedown = (e) => { isScrubbing = true; scrubAtEvent(e, canvas); };
+            window.onmouseup = () => { isScrubbing = false; };
+            canvas.onmousemove = (e) => { if (isScrubbing) scrubAtEvent(e, canvas); };
+
+            canvas.ontouchstart = (e) => {
+                isScrubbing = true;
+                scrubAtEvent(e.touches[0], canvas);
+            };
+            canvas.ontouchend = () => { isScrubbing = false; };
+            canvas.ontouchmove = (e) => {
+                e.preventDefault();
+                if (isScrubbing) scrubAtEvent(e.touches[0], canvas);
+            };
+        }
+
+        function drawDustLayer() {
+            const canvas = document.getElementById('dustCanvas');
+            if (!canvas || !dustCtx) return;
+
+            dustCtx.globalCompositeOperation = 'source-over';
+            const isMoon = activeRelic && activeRelic.sector === 'moon';
+            const isDeep = activeRelic && activeRelic.sector === 'deepspace';
+
+            // Fill with Martian Rust, Lunar Grey Regolith, or Cosmic Frost
+            const grad = dustCtx.createLinearGradient(0, 0, canvas.width, canvas.height);
+            if (isMoon) {
+                grad.addColorStop(0, '#475569');
+                grad.addColorStop(1, '#334155');
+            } else if (isDeep) {
+                grad.addColorStop(0, '#3b0764');
+                grad.addColorStop(1, '#1e1b4b');
+            } else {
+                grad.addColorStop(0, '#9a3412');
+                grad.addColorStop(1, '#7c2d12');
+            }
+            dustCtx.fillStyle = grad;
+            dustCtx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Add speckled dust texture
+            for (let i = 0; i < 160; i++) {
+                dustCtx.fillStyle = isMoon ? 'rgba(226,232,240,0.22)' : 'rgba(253,186,116,0.25)';
+                dustCtx.beginPath();
+                dustCtx.arc(
+                    Math.random() * canvas.width,
+                    Math.random() * canvas.height,
+                    Math.random() * 2.5 + 0.5,
+                    0,
+                    Math.PI * 2
+                );
+                dustCtx.fill();
+            }
+
+            // Instruction overlay text on the dust
+            dustCtx.fillStyle = '#ffffff';
+            dustCtx.font = 'bold 13px Orbitron, sans-serif';
+            dustCtx.textAlign = 'center';
+            dustCtx.fillText('SCRUB HERE TO CLEAR COSMIC DUST', canvas.width / 2, canvas.height / 2 + 4);
+
+            document.getElementById('dustCleanPercentage').textContent = '0% Restored';
+        }
+
+        function scrubAtEvent(pointer, canvas) {
+            if (!dustCtx) return;
+            const rect = canvas.getBoundingClientRect();
+            const x = pointer.clientX - rect.left;
+            const y = pointer.clientY - rect.top;
+
+            dustCtx.globalCompositeOperation = 'destination-out';
+            dustCtx.beginPath();
+            dustCtx.arc(x, y, 26, 0, Math.PI * 2);
+            dustCtx.fill();
+
+            calculateClearedDust(canvas);
+        }
+
+        function calculateClearedDust(canvas) {
+            const imgData = dustCtx.getImageData(0, 0, canvas.width, canvas.height).data;
+            let transparentPixels = 0;
+            const totalPixels = imgData.length / 4;
+
+            for (let i = 3; i < imgData.length; i += 16) {
+                if (imgData[i] < 128) transparentPixels++;
+            }
+
+            const sampleTotal = totalPixels / 4;
+            const percent = Math.min(100, Math.round((transparentPixels / sampleTotal) * 115));
+            document.getElementById('dustCleanPercentage').textContent = `${percent}% Restored`;
+        }
+
+        function instantCleanDust() {
+            const canvas = document.getElementById('dustCanvas');
+            if (!canvas || !dustCtx) return;
+            dustCtx.clearRect(0, 0, canvas.width, canvas.height);
+            document.getElementById('dustCleanPercentage').textContent = '100% Restored!';
+            playTone(740, 0.12, 'triangle');
+        }
+
+        function resetDustCanvas() {
+            drawDustLayer();
+            playTone(400, 0.06, 'sine');
+        }
+
+        /********************************************************************
+         * 7. MISSION SPECIALIST QUIZ & BADGE UNLOCKING
+         ********************************************************************/
+        function setupQuizForRelic(relic) {
+            document.getElementById('quizQuestionText').textContent = relic.quiz.question;
+            const optionsBox = document.getElementById('quizOptionsContainer');
+            const feedbackBox = document.getElementById('quizFeedbackBox');
+            feedbackBox.classList.add('hidden');
+
+            optionsBox.innerHTML = relic.quiz.options.map((optionText, idx) => `
+                <button onclick="submitQuizAnswer(${idx})" class="w-full text-left p-3.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700/80 hover:border-cyan-400/60 text-xs sm:text-sm text-slate-200 transition-all flex items-start gap-3">
+                    <span class="w-6 h-6 rounded-lg bg-slate-800 border border-slate-600 text-xs font-mono font-bold flex items-center justify-center shrink-0 text-cyan-300">
+                        ${String.fromCharCode(65 + idx)}
+                    </span>
+                    <span>${optionText}</span>
+                </button>
+            `).join('');
+        }
+
+        function submitQuizAnswer(selectedIndex) {
+            if (!activeRelic) return;
+            const feedbackBox = document.getElementById('quizFeedbackBox');
+            feedbackBox.classList.remove('hidden');
+
+            if (selectedIndex === activeRelic.quiz.correctIndex) {
+                const isNewUnlock = !decodedRelics.has(activeRelic.id);
+                decodedRelics.add(activeRelic.id);
+                playBadgeUnlockFanfare();
+                instantCleanDust(); // Also celebrate by clearing any remaining dust
+
+                feedbackBox.className = 'p-4 rounded-xl text-xs font-mono border bg-emerald-500/15 border-emerald-500/40 text-emerald-200 space-y-1';
+                feedbackBox.innerHTML = `
+                    <div class="font-bold text-emerald-300 flex items-center gap-2">
+                        <i class="fa-solid fa-award text-base"></i>
+                        <span>MISSION BADGE UNLOCKED: ${activeRelic.badgeTitle.toUpperCase()}!</span>
+                    </div>
+                    <p>${activeRelic.quiz.explanation}</p>
+                `;
+
+                updateGlobalProgressUI();
+                renderHardwareGridAndRadar();
+            } else {
+                playTone(220, 0.15, 'sawtooth');
+                feedbackBox.className = 'p-4 rounded-xl text-xs font-mono border bg-rose-500/15 border-rose-500/40 text-rose-200';
+                feedbackBox.innerHTML = `
+                    <div class="font-bold text-rose-300 mb-1"><i class="fa-solid fa-triangle-exclamation mr-1"></i> TELEMETRY MISMATCH — TRY AGAIN!</div>
+                    <p>Hint: Check Tab 1 or Tab 2 to review ${activeRelic.name}'s discoveries.</p>
+                `;
+            }
+        }
+
+        function updateGlobalProgressUI() {
+            const count = decodedRelics.size;
+            const total = RELICS_DATA.length;
+            const percentage = Math.round((count / total) * 100);
+
+            document.getElementById('headerProgressText').textContent = `${count} / ${total}`;
+            document.getElementById('headerProgressBar').style.width = `${percentage}%`;
+            document.getElementById('badgeCountBubble').textContent = count;
+        }
+
+        function toggleBadgesModal() {
+            playTone(520, 0.07, 'sine');
+            const modal = document.getElementById('badgesModal');
+            const isHidden = modal.classList.contains('hidden');
+
+            if (isHidden) {
+                renderBadgesVault();
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+            } else {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            }
+        }
+
+        function renderBadgesVault() {
+            const grid = document.getElementById('badgesVaultGrid');
+            grid.innerHTML = RELICS_DATA.map(relic => {
+                const unlocked = decodedRelics.has(relic.id);
+                return `
+                    <div onclick="toggleBadgesModal(); openRelicModal('${relic.id}')" class="cursor-pointer p-4 rounded-2xl border text-center transition-all ${unlocked ? 'bg-amber-500/10 border-amber-400/50 shadow-lg shadow-amber-500/10' : 'bg-slate-950/70 border-slate-800 opacity-60 hover:opacity-100'}">
+                        <div class="w-12 h-12 mx-auto rounded-2xl flex items-center justify-center mb-2.5 ${unlocked ? 'bg-amber-500/20 text-amber-300 border border-amber-400/40' : 'bg-slate-900 text-slate-500 border border-slate-800'}">
+                            <i class="fa-solid ${relic.badgeIcon} text-xl"></i>
+                        </div>
+                        <div class="font-display font-bold text-xs text-white">${relic.badgeTitle}</div>
+                        <div class="text-[11px] font-mono mt-1 ${unlocked ? 'text-emerald-400' : 'text-slate-400'}">
+                            ${unlocked ? '★ UNLOCKED' : 'Click to Unlock'}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        /********************************************************************
+         * 8. BACKGROUND COSMIC STARFIELD & DRIFTING PLANETARY DUST CANVAS
+         ********************************************************************/
+        const cosmosCanvas = document.getElementById('cosmosCanvas');
+        const cosmosCtx = cosmosCanvas.getContext('2d');
+        let stars = [];
+        let dustParticles = [];
+
+        function resizeCosmosCanvas() {
+            cosmosCanvas.width = window.innerWidth;
+            cosmosCanvas.height = window.innerHeight;
+        }
+
+        function initCosmosParticles() {
+            resizeCosmosCanvas();
+            stars = Array.from({ length: 110 }, () => ({
+                x: Math.random() * cosmosCanvas.width,
+                y: Math.random() * cosmosCanvas.height,
+                r: Math.random() * 1.4 + 0.3,
+                alpha: Math.random(),
+                speed: Math.random() * 0.015 + 0.004
+            }));
+
+            dustParticles = Array.from({ length: 42 }, () => ({
+                x: Math.random() * cosmosCanvas.width,
+                y: Math.random() * cosmosCanvas.height,
+                r: Math.random() * 2.4 + 0.8,
+                vx: (Math.random() - 0.5) * 0.35,
+                vy: (Math.random() - 0.5) * 0.25,
+                alpha: Math.random() * 0.55 + 0.15
+            }));
+        }
+
+        function animateCosmos() {
+            cosmosCtx.clearRect(0, 0, cosmosCanvas.width, cosmosCanvas.height);
+
+            // Twinkling Stars
+            stars.forEach(s => {
+                s.alpha += s.speed;
+                const opacity = (Math.sin(s.alpha) + 1) / 2 * 0.8 + 0.15;
+                cosmosCtx.fillStyle = `rgba(248, 250, 252, ${opacity})`;
+                cosmosCtx.beginPath();
+                cosmosCtx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+                cosmosCtx.fill();
+            });
+
+            // Drifting Planetary Dust Colored by Active Sector
+            const rgb = SECTOR_THEMES[currentSector].particleColor;
+            dustParticles.forEach(p => {
+                p.x += p.vx;
+                p.y += p.vy;
+                if (p.x < 0) p.x = cosmosCanvas.width;
+                if (p.x > cosmosCanvas.width) p.x = 0;
+                if (p.y < 0) p.y = cosmosCanvas.height;
+                if (p.y > cosmosCanvas.height) p.y = 0;
+
+                cosmosCtx.fillStyle = `rgba(${rgb}, ${p.alpha})`;
+                cosmosCtx.beginPath();
+                cosmosCtx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+                cosmosCtx.fill();
+            });
+
+            requestAnimationFrame(animateCosmos);
+        }
+
+        // Close modal with Escape key
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeRelicModal();
+                document.getElementById('badgesModal').classList.add('hidden');
+            }
+        });
+
+        window.addEventListener('resize', resizeCosmosCanvas);
+
+        // Start Application on Window Load
+        window.onload = function () {
+            initCosmosParticles();
+            animateCosmos();
+            renderHardwareGridAndRadar();
+        };
+    </script>
+</body>
+</html>
